@@ -8,6 +8,13 @@
 #include <string.h>
 #include "bf.h"
 
+#ifdef BARE_M
+#include "mpconfig.h"
+#include "misc.h"
+#define realloc m_realloc
+#define free m_free
+#endif
+
 STATIC char* __mpbf_returnval__;
 STATIC int __mpbf_precdigits__;
 STATIC int __mpbf_rnd_mode__;

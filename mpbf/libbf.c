@@ -68,6 +68,12 @@
 
 #endif
 
+#ifdef BARE_M
+__attribute__((noreturn)) void abort (void) {
+    //printf("abort() called.\n");
+}
+#endif
+
 typedef int bf_op2_func_t(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
                           bf_flags_t flags);
 
@@ -614,10 +620,10 @@ int bf_round(bf_t *r, limb_t prec, bf_flags_t flags)
 static unused void dump_limbs(const char *str, const limb_t *tab, limb_t n)
 {
     limb_t i;
-    printf("%s: len=%" PRId_LIMB "\n", str, n);
+    printf("%s: len=%" PRId_LIMB "\n", str, (int)n);
     for(i = 0; i < n; i++) {
         printf("%" PRId_LIMB ": " FMT_LIMB "\n",
-               i, tab[i]);
+               (int)i, (unsigned int)tab[i]);
     }
 }
 
@@ -639,8 +645,8 @@ void bf_print_str(const char *str, const bf_t *a)
         } else {
             printf("0x0.");
             for(i = a->len - 1; i >= 0; i--)
-                printf(FMT_LIMB, a->tab[i]);
-            printf("p%" PRId_LIMB, a->expn);
+                printf(FMT_LIMB, (unsigned int)a->tab[i]);
+            printf("p%" PRId_LIMB, (int) a->expn);
         }
     }
     printf("\n");
@@ -1546,7 +1552,7 @@ int bf_remainder(bf_t *r, const bf_t *a, const bf_t *b, limb_t prec,
     return ret;
 }
 
-static inline int bf_get_limb(slimb_t *pres, const bf_t *a, int flags)
+static inline int bf_get_limb(slimb_t *pres, const bf_t *a, slimb_t flags)
 {
 #if LIMB_BITS == 32
     return bf_get_int32(pres, a, flags);
@@ -2169,7 +2175,7 @@ void bf_set_float64(bf_t *a, double d)
 
 /* The rounding mode is always BF_RNDZ. Return BF_ST_OVERFLOW if there
    is an overflow and 0 otherwise. */
-int bf_get_int32(int *pres, const bf_t *a, int flags)
+int bf_get_int32(slimb_t *pres, const bf_t *a, slimb_t flags)
 {
     uint32_t v;
     int ret;
@@ -2213,7 +2219,7 @@ int bf_get_int32(int *pres, const bf_t *a, int flags)
 
 /* The rounding mode is always BF_RNDZ. Return BF_ST_OVERFLOW if there
    is an overflow and 0 otherwise. */
-int bf_get_int64(int64_t *pres, const bf_t *a, int flags)
+int bf_get_int64(slimb_t *pres, const bf_t *a, slimb_t flags)
 {
     uint64_t v;
     int ret;

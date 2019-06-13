@@ -9,6 +9,13 @@
 #include "libbf.h"
 #include "bf.h"
 
+#ifdef BARE_M
+#include "mpconfig.h"
+#include "misc.h"
+#define realloc m_realloc
+#define free m_free
+#endif
+
 /* number of bits per base 10 digit */
 #define BITS_PER_DIGIT 3.32192809488736234786
 
@@ -76,7 +83,8 @@ char* bf_sop (
 	int32_t status;
     char *digits;
 
-	prec = (limb_t) ceil(precisiondigits * BITS_PER_DIGIT) + 32;
+	//prec = (limb_t) int(precisiondigits * BITS_PER_DIGIT) + 32;
+	prec = (limb_t) (precisiondigits * 4 + 32);
     bf_init(&bf_ctx, &A);
     bf_init(&bf_ctx, &B);
     bf_init(&bf_ctx, &R);
