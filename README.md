@@ -58,7 +58,7 @@ The returned string always ends with `s<a signed number>` -- this indicates the 
 can be discarded.
 
 ### MPAP usage
-The number format is defined in [MPAP] (https://github.com/hacksterous/mpap). It's not necessary
+The number format is defined in [MPAP](https://github.com/hacksterous/mpap). It's not necessary
 to use MPAP for availing arbitrary precision functions provided by MPBF/libbf, but it helps as a numerical
 representation of floating point numbers instead of strings.
 
