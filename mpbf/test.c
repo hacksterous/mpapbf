@@ -1,4 +1,5 @@
-//anirb
+//(c) 2019 Anirban Banerjee
+//This test compiles and runs only on a Unix-compatible OS.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,6 @@
 #define BITS_PER_DIGIT 3.32192809488736234786
 
 int main(int argc, char **argv) {
-
 	char *val = realloc(NULL, 20000);
 	bf_initialize ();
 	val = bf_sop("-1.23e20", "3.1415926535897932384626433832795028841971693", BF_OP_MUL, 50, 0);
@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
 	char * b = "3.1415926535897932384626433832795028841971693993751058";
 	val = bf_sop(b, "", BF_OP_LOG, 50, 0);
 	printf ("log %s is %s\n", b, val);
+	bf_exit();
 	free(val);
 	return 0;
 }
