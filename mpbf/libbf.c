@@ -69,8 +69,12 @@
 #endif
 
 #ifdef BARE_M
+#include <py/runtime.h>
+
+NORETURN void abort_(void);
+
 __attribute__((noreturn)) void abort (void) {
-    //printf("abort() called.\n");
+	abort_();
 }
 #endif
 
