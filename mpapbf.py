@@ -20,6 +20,22 @@ mpbf.set_params (PRECISION, ROUNDING_MODE)
 def finish ():
     mpbf.finish()
 
+def rprec():
+    global ROUNDING_MODE
+    global PRECISION
+    global UPPERLAYER_PRECISION
+    global BIGGESTNUM
+    PRECISION = UPPERLAYER_PRECISION 
+    BIGGESTNUM = 1
+    mpbf.set_params (PRECISION, ROUNDING_MODE)
+
+def sprec(prec):
+    global ROUNDING_MODE
+    global PRECISION
+    global UPPERLAYER_PRECISION
+    PRECISION = UPPERLAYER_PRECISION = prec
+    mpbf.set_params (PRECISION, ROUNDING_MODE)
+
 class mpap ():
     PIx2 = '6.283185307179586476925286766559005768394338798750211641949889184615632812572417997256069650684234135988'
 
@@ -62,6 +78,7 @@ class mpap ():
         global BIGGESTNUM
         global MPAPERRORFLAG
         global UPPERLAYER_PRECISION
+        global ROUNDING_MODE
 
         if(isinstance(Mantissa, mpap)):
             self.Mantissa = Mantissa.Mantissa
@@ -187,20 +204,6 @@ class mpap ():
     def isInt(self):
         # 123456 --> (123456, 5)
         return len(str(self.Mantissa).replace('-', '')) <= self.Exponent + 1
-
-    def rprec(self):
-        global PRECISION
-        global UPPERLAYER_PRECISION
-        global BIGGESTNUM
-        
-        PRECISION = UPPERLAYER_PRECISION #31 bit PRECISION gives 23 accurate significant digits
-        BIGGESTNUM = 1
-        mpbf.set_params (PRECISION, ROUNDING_MODE)
-
-    def sprec(self, prec):
-        global UPPERLAYER_PRECISION
-        UPPERLAYER_PRECISION = prec
-        mpbf.set_params (UPPERLAYER_PRECISION, ROUNDING_MODE)
 
     def int(self, preserveType = True):
         # 123456 (123456, 5)
