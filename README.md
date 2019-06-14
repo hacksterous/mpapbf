@@ -73,6 +73,6 @@ Keep mpapbf.py in a directory listed in a standard sys.path.
 ```   
 ## Known Issues
 
-1. Precision cannot be dynamically set in MPAP because of a bug in `mpapbf.py` and the `set_params()` function in mpbf.c
+1. Precision cannot be dynamically set in MPAP because of a bug in `mpapbf.py` and the `set_params()` function in `mpbf.c`.
 
    
