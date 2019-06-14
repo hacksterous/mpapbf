@@ -25,8 +25,8 @@ def rprec():
     global PRECISION
     global UPPERLAYER_PRECISION
     global BIGGESTNUM
-    PRECISION = UPPERLAYER_PRECISION 
     BIGGESTNUM = 1
+    PRECISION = UPPERLAYER_PRECISION = 27
     mpbf.set_params (PRECISION, ROUNDING_MODE)
 
 def sprec(prec):
