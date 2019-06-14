@@ -11,8 +11,8 @@ cutils.c: BF utilities.
 cutils.h: BF utilities header.
 bf.c: C wrapper for libbf. This provides a set of functions that are called by the functions in mpbf.c   
 bf.h: Header for C wrapper.                             
-mpbf.c: MicroPython wrapper for BF. These are 3 functions that are exposed to Python.
-mpapbf.py: MicroPython module. Optional.
+mpbf.c: MicroPython external C module for libbf. There are 3 functions that are exposed to Python.
+mpapbf.py: Wrapper MicroPython module. Optional.
 micropython.mk: C module makfile.                       
 test.c: Simple C test.
 Makefile.mpbf: Example Makefile for running a simple test on Unix (test.c)                
