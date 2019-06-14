@@ -1,6 +1,8 @@
-## Minimalistic Python with Arbitrary Precision using BF
-MPAPBF is a MicroPython wrapper around libbf (https://bellard.org/libbf/).
+## Minimalistic Python with Arbitrary Precision using LibBF
+MPBF is a MicroPython wrapper around [libbf](https://bellard.org/libbf/).
 Works for Unix and STM32 ports, but might also work for ESP32.
+
+### File Description
 
 ```
 libbf.c: BF core functions.
@@ -9,8 +11,8 @@ cutils.c: BF utilities.
 cutils.h: BF utilities header.
 bf.c: C wrapper for libbf. This provides a set of functions that are called by the functions in mpbf.c   
 bf.h: Header for C wrapper.                             
-mpbf.c: MicroPython wrapper for BF. These are 3 functions that are exposed to Python.
-mpapbf.py: MicroPython module. Optional.
+mpbf.c: MicroPython external C module for libbf. There are 3 functions that are exposed to Python.
+mpapbf.py: Wrapper MicroPython module. Optional.
 micropython.mk: C module makfile.                       
 test.c: Simple C test.
 Makefile.mpbf: Example Makefile for running a simple test on Unix (test.c)                
@@ -47,12 +49,16 @@ All operations are done on decimal numbers represented as strings, e.g.:
    4884167509244761460668082264800168477411853742345442437107539077744992069551702761838606261331384583000752044933826
    5602976067371132007093287091274437470472306969772093101416928368190255151086574637721112523897844250569536967707854
    4996996794686445490598793163688923009879313s-16'
+   >>> mpbf.set_params(5, 0)
+   >>> mpbf.sop('1', '0', 5)
+   '2.71828s-16'
+   >>> mpbf.finish() #deallocate memory
 ```
 The returned string always ends with `s<a signed number>` -- this indicates the status returned by libbf and in most cases
 can be discarded.
 
 ### MPAP usage
-The number format is defined in [MPAP] (https://github.com/hacksterous/mpap). It's not necessary
+The number format is defined in [MPAP](https://github.com/hacksterous/mpap). It's not necessary
 to use MPAP for availing arbitrary precision functions provided by MPBF/libbf, but it helps as a numerical
 representation of floating point numbers instead of strings.
 
@@ -67,6 +73,6 @@ Keep mpapbf.py in a directory listed in a standard sys.path.
 ```   
 ## Known Issues
 
-1. Precision cannot be dynamically set in MPAP because of a bug in `mpapbf.py` and the `set_params()` function in mpbf.c
+1. Precision cannot be dynamically set in MPAP because of a bug in `mpapbf.py` and the `set_params()` function in `mpbf.c`.
 
    
