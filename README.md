@@ -1,6 +1,8 @@
-## Minimalistic Python with Arbitrary Precision using BF
-MPAPBF is a MicroPython wrapper around libbf (https://bellard.org/libbf/).
+## Minimalistic Python with Arbitrary Precision using LibBF
+MPBF is a MicroPython wrapper around [libbf](https://bellard.org/libbf/).
 Works for Unix and STM32 ports, but might also work for ESP32.
+
+### File Description
 
 ```
 libbf.c: BF core functions.
