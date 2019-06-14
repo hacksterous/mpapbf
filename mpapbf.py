@@ -276,6 +276,9 @@ class mpap ():
         i = self.int(preserveType = True)
         return i if self.Sign >= 0 else i-1
 
+    def ceil(self):
+        return self.floor() + 1
+
     def __neg__(self):
         return mpap(Mantissa = (-1) * self.Mantissa, Exponent = self.Exponent, InternalAware = True)
 
@@ -401,7 +404,10 @@ class mpap ():
         return self.bfwrapper1(5)
 
     def digits(self):
-        return len(str(int(self)))
+        return mpap(len(str(int(self))))
+
+    def bits(self):
+        return mpap(self.log()/mpap(2).log()).ceil()
 
     def tan (self):
         return self.bfwrapper1(9)
