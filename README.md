@@ -1,5 +1,5 @@
 ## Minimalistic Python Arbitrary Precision Math Using LibBF
-MPBF is a MicroPython wrapper around [libbf](https://bellard.org/libbf/).
+MPBF is a MicroPython wrapper around [LibBF](https://bellard.org/libbf/).
 Works for Unix and STM32 ports, but might also work for ESP32.
 
 ### File Description
