@@ -1,4 +1,11 @@
-//anirb
+//#########################################################
+//# mpap
+//# Minimalistic Python port of Arbitrary Precision Arithmetic using BF
+//# Based on MPAP
+//# https://bellard.org/libbf/
+//# Targeted for MicroPython on microcontrollers
+//# (c) 2019 Anirban Banerjee <anirbax@gmail.com>
+//#########################################################
 
 #include <stdio.h>
 #include <stdlib.h>

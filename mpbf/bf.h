@@ -1,3 +1,12 @@
+//#########################################################
+//# mpap
+//# Minimalistic Python port of Arbitrary Precision Arithmetic using BF
+//# Based on MPAP
+//# https://bellard.org/libbf/
+//# Targeted for MicroPython on microcontrollers
+//# (c) 2019 Anirban Banerjee <anirbax@gmail.com>
+//#########################################################
+
 typedef enum {
 	BF_OP_ADD,    //0
 	BF_OP_MUL,    //1
