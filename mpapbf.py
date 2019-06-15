@@ -7,10 +7,9 @@
 # (c) 2019 Anirban Banerjee <anirbax@gmail.com>
 #########################################################
 MPAPERRORFLAG = ''
-
-UPPERLAYER_PRECISION = 27
+MAX_PRECISION_HARD_LIMIT = 1000
 ROUNDING_MODE = 0
-PRECISION = UPPERLAYER_PRECISION 
+PRECISION = 27 
 BIGGESTNUM = 1
 import mpbf
 
@@ -23,17 +22,15 @@ def finish ():
 def rprec():
     global ROUNDING_MODE
     global PRECISION
-    global UPPERLAYER_PRECISION
     global BIGGESTNUM
     BIGGESTNUM = 1
-    PRECISION = UPPERLAYER_PRECISION = 27
+    PRECISION = 27
     mpbf.set_params (PRECISION, ROUNDING_MODE)
 
 def sprec(prec):
     global ROUNDING_MODE
     global PRECISION
-    global UPPERLAYER_PRECISION
-    PRECISION = UPPERLAYER_PRECISION = prec
+    PRECISION = prec
     mpbf.set_params (PRECISION, ROUNDING_MODE)
 
 class mpap ():
@@ -74,10 +71,10 @@ class mpap ():
     def __init__(self, Mantissa, Exponent = 0, InternalAware = False, \
         ImagMantissa = 0, ImagExponent = 0):
 
+        global MAX_PRECISION_HARD_LIMIT
         global PRECISION
         global BIGGESTNUM
         global MPAPERRORFLAG
-        global UPPERLAYER_PRECISION
         global ROUNDING_MODE
 
         if(isinstance(Mantissa, mpap)):
@@ -175,8 +172,10 @@ class mpap ():
         PRECISION = max(PRECISION, (len(str(self.Mantissa).replace('-', '')) + self.Exponent))
         BIGGESTNUM = max(BIGGESTNUM, self.Exponent+1)
         #but don't let the precision grow beyond the max. precision value of 
-        #(BIGGESTNUM + UPPERLAYER_PRECISION)
-        PRECISION = min(PRECISION, BIGGESTNUM + UPPERLAYER_PRECISION)
+        BIGGESTNUM = min(BIGGESTNUM, MAX_PRECISION_HARD_LIMIT)
+        #print ("BIGGESTNUM is ", BIGGESTNUM)
+        PRECISION = max(PRECISION, BIGGESTNUM)
+        #print ("auto-setting mpbf precision to: ", PRECISION)
         mpbf.set_params (PRECISION, ROUNDING_MODE)
 
         #zero value has sign 0
@@ -188,6 +187,8 @@ class mpap ():
         return mpap(mpbf.sop (self.scistr(), '', op).split('s')[0])
 
     def bfwrapper2 (self, other, op):
+        #print ("bfwrapper2: self", repr(self))
+        #print ("bfwrapper2: other", repr(other))
         return mpap(mpbf.sop (self.scistr(), other.scistr(), op).split('s')[0])
 
     def __truediv__ (self, other):
@@ -199,7 +200,25 @@ class mpap ():
             MPAPERRORFLAG = "Division by zero."
             return mpap(0)
 
-        return self.bfwrapper2(other, 3)
+        #integer dividend
+        if self == int(self):
+            m = int(self)/other.Mantissa
+            return mpap(Mantissa = m, Exponent = -other.Exponent)
+        
+        #subtract divisor's exponent from dividend's exponent after adjusting
+        #for the InternalAware representaiton
+        re = self.Exponent - (len(str(self.Mantissa).replace('-', '')) - 1)
+        re -= other.Exponent - (len(str(other.Mantissa).replace('-', '')) - 1)
+
+        #print ("re is ", re)
+        #print ("self.Mantissa is ", self.Mantissa)
+        #print ("other.Mantissa is ", other.Mantissa)
+
+        rm = mpap(self.Mantissa).bfwrapper2(mpap(other.Mantissa), 3)
+        #print ("rm is ", repr(rm))
+        rm = mpap(Mantissa = str(rm), Exponent = re, InternalAware = False)
+        #print ("rm is ", repr(rm))
+        return rm
 
     def isInt(self):
         # 123456 --> (123456, 5)
