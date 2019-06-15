@@ -172,9 +172,9 @@ class mpap ():
         PRECISION = max(PRECISION, (len(str(self.Mantissa).replace('-', '')) + self.Exponent))
         BIGGESTNUM = max(BIGGESTNUM, self.Exponent+1)
         #but don't let the precision grow beyond the max. precision value of 
-        BIGGESTNUM = min(BIGGESTNUM, MAX_PRECISION_HARD_LIMIT)
         #print ("BIGGESTNUM is ", BIGGESTNUM)
         PRECISION = max(PRECISION, BIGGESTNUM)
+        PRECISION = min(PRECISION, MAX_PRECISION_HARD_LIMIT)
         #print ("auto-setting mpbf precision to: ", PRECISION)
         mpbf.set_params (PRECISION, ROUNDING_MODE)
 
