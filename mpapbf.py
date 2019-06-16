@@ -30,6 +30,8 @@ def rprec():
 def sprec(prec):
     global ROUNDING_MODE
     global PRECISION
+    global BIGGESTNUM
+    BIGGESTNUM = 1
     PRECISION = prec
     mpbf.set_params (PRECISION, ROUNDING_MODE)
 
