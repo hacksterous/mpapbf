@@ -189,8 +189,6 @@ class mpap ():
         return mpap(mpbf.sop (self.scistr(), '', op).split('s')[0])
 
     def bfwrapper2 (self, other, op):
-        #print ("bfwrapper2: self", repr(self))
-        #print ("bfwrapper2: other", repr(other))
         return mpap(mpbf.sop (self.scistr(), other.scistr(), op).split('s')[0])
 
     def __truediv__ (self, other):
@@ -202,11 +200,6 @@ class mpap ():
             MPAPERRORFLAG = "Division by zero."
             return mpap(0)
 
-        #integer dividend
-        if self == int(self):
-            m = int(self)/other.Mantissa
-            return mpap(Mantissa = m, Exponent = -other.Exponent)
-        
         #subtract divisor's exponent from dividend's exponent after adjusting
         #for the InternalAware representaiton
         re = self.Exponent - (len(str(self.Mantissa).replace('-', '')) - 1)
