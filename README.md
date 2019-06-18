@@ -27,10 +27,10 @@ Works for Unix and STM32 ports, but might also work for ESP32.
    $ cd $MP/ports/unix/
    $ make V=1 USER_C_MODULES=. CFLAGS_EXTRA="-DMODULE_MPBF_ENABLED=1"
 ```  
-3. Compile command for stm32:
+3. Compile command for stm32 (F407VE board):
 ```
    $ cd $MP/ports/stm32/
-   $ make CROSS_COMPILE=arm-linux- V=1 USER_C_MODULES=. CFLAGS_EXTRA="-DMODULE_MPBF_ENABLED=1 -DBARE_M=1"
+   $ make BOARD=BLACK_F407VE USER_C_MODULES=. CFLAGS_EXTRA="-DMODULE_MPBF_ENABLED=1 -DBARE_M=1"
 ```   
 ### MPBF Usage
 
