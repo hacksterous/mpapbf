@@ -113,6 +113,9 @@ char* bf_sop (
 		case BF_OP_DIV:
 			status = bf_div (&R, &A, &B, prec, rnd_mode);
 			break;
+		case BF_OP_POW:
+			status = bf_pow (&R, &A, &B, prec, rnd_mode);
+			break;
 		case BF_OP_REM:
 			status = bf_remainder (&R, &A, &B, prec, rnd_mode);
 			break;
