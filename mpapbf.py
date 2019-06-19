@@ -270,18 +270,42 @@ class mpap ():
     # returns new mantissa as a string with adecimal point
     # and the exponent as an integer
     def sci(self):
-        strMantissa = str(self.Mantissa)
-        strMantissa = strMantissa.replace('-', '')
-        lenStrMantissa = len(strMantissa)
-        diff = self.Exponent - lenStrMantissa + 4 # 3 additional places
-        strMantissa = strMantissa + '0'*diff
+        #print ("self is ", repr(self))
+        man = str(self.Mantissa)
         expo = self.Exponent
-        multfac = self.Exponent % 3 + 1
-        expo = (self.Exponent // 3) * 3
-        man = ('-' if (self.Sign == -1) else '') + strMantissa[:multfac] + '.' + strMantissa[multfac:]
+        #print ("man is ", man)
+        #print ("expo is ", expo)
+        strMantissa = str(man).replace('-', '')
+        lenStrMantissa = len(strMantissa)
+        if self.Exponent <= 0:
+            # we increase the exponent value to the nearest negative
+            # upper multiple and compensate by adding more 0s to the
+            #mantissa string
+            if self.Exponent % 3 != 0:
+                multfac = (3-abs(self.Exponent)%3)
+                #print ("1. multfac is ", multfac)
+                expo = self.Exponent - multfac
+                if  lenStrMantissa < multfac + 1:
+                    strMantissa +=  '0'*(multfac+1-lenStrMantissa)
+            else:
+                multfac = 0
+            man = ('-' if (self.Sign == -1) else '') + strMantissa[:multfac+1] + '.' + strMantissa[multfac+1:]
+
+        else:
+            diff = self.Exponent - lenStrMantissa + 1 
+            if diff < 0:
+                diff += 3 # 3 additional places
+            strMantissa = strMantissa + '0'*diff
+            expo = self.Exponent
+            multfac = self.Exponent % 3 + 1
+            #print ("2. multfac is ", multfac)
+            expo = (expo// 3) * 3
+            man = ('-' if (self.Sign == -1) else '') + strMantissa[:multfac] + '.' + strMantissa[multfac:]
         # handle the case when mantissa string is like '123.' -- add a zero at end
         if man[-1:] == '.':
             man += '0'
+        elif man.find('.') == -1:
+            man += '.0'
         return man, expo
 
     # similar to sci(), but returns a single string as ###.#######e###
