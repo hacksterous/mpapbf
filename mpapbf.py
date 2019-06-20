@@ -10,7 +10,6 @@ MPAPERRORFLAG = ''
 MAX_PRECISION_HARD_LIMIT = 1000
 ROUNDING_MODE = 0
 PRECISION = 27 
-BIGGESTNUM = 1
 import mpbf
 
 mpbf.init ()
@@ -22,17 +21,14 @@ def finish ():
 def rprec():
     global ROUNDING_MODE
     global PRECISION
-    global BIGGESTNUM
-    BIGGESTNUM = 1
     PRECISION = 27
     mpbf.set_params (PRECISION, ROUNDING_MODE)
 
 def sprec(prec):
     global ROUNDING_MODE
     global PRECISION
-    global BIGGESTNUM
-    BIGGESTNUM = 1
-    PRECISION = prec
+    global MAX_PRECISION_HARD_LIMIT
+    PRECISION = min(prec, MAX_PRECISION_HARD_LIMIT)
     mpbf.set_params (PRECISION, ROUNDING_MODE)
 
 class mpap ():
@@ -73,11 +69,7 @@ class mpap ():
     def __init__(self, Mantissa, Exponent = 0, InternalAware = False, \
         ImagMantissa = 0, ImagExponent = 0):
 
-        global MAX_PRECISION_HARD_LIMIT
-        global PRECISION
-        global BIGGESTNUM
         global MPAPERRORFLAG
-        global ROUNDING_MODE
 
         if(isinstance(Mantissa, mpap)):
             self.Mantissa = Mantissa.Mantissa
@@ -152,6 +144,7 @@ class mpap ():
                 self.Exponent = 0
             else:
                 self.Mantissa = Mantissa
+                #print ("InternalAware is ", InternalAware)
                 if(InternalAware):
                     self.Exponent = Exponent
                 else:
@@ -170,17 +163,6 @@ class mpap ():
             i += 1
         self.Mantissa = int (MantissaStr)
 
-        #For numbers with large exponents, grow the precision
-        PRECISION = max(PRECISION, (len(str(self.Mantissa).replace('-', '')) + self.Exponent))
-        BIGGESTNUM = max(BIGGESTNUM, self.Exponent+1)
-        #but don't let the precision grow beyond the max. precision value of 
-        #print ("BIGGESTNUM is ", BIGGESTNUM)
-        PRECISION = max(PRECISION, BIGGESTNUM)
-        PRECISION = min(PRECISION, MAX_PRECISION_HARD_LIMIT)
-        #print ("auto-setting mpbf precision to: ", PRECISION)
-        mpbf.set_params (PRECISION, ROUNDING_MODE)
-
-        #zero value has sign 0
         self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 and self.Exponent == 0 else -1))
         return
     #enddef init
@@ -205,14 +187,10 @@ class mpap ():
         re = self.Exponent - (len(str(self.Mantissa).replace('-', '')) - 1)
         re -= other.Exponent - (len(str(other.Mantissa).replace('-', '')) - 1)
 
-        #print ("re is ", re)
-        #print ("self.Mantissa is ", self.Mantissa)
-        #print ("other.Mantissa is ", other.Mantissa)
-
+		#do division of the mantissa integers with the set precision
         rm = mpap(self.Mantissa).bfwrapper2(mpap(other.Mantissa), 3)
-        #print ("rm is ", repr(rm))
-        rm = mpap(Mantissa = str(rm), Exponent = re, InternalAware = False)
-        #print ("rm is ", repr(rm))
+		#then adjust the exponent calculated earlier
+        rm = mpap(Mantissa = str(rm), Exponent = re, InternalAware = True)
         return rm
 
     def isInt(self):
