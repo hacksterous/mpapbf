@@ -15,7 +15,11 @@
 #define free m_free
 #endif
 
+#ifdef BARE_M
+STATIC char __mpbf_returnval__[201] = "";
+#else
 STATIC char* __mpbf_returnval__;
+#endif
 STATIC int __mpbf_precdigits__;
 STATIC int __mpbf_rnd_mode__;
 
@@ -27,6 +31,9 @@ STATIC mp_obj_t mpbf_init (void) {
 STATIC mp_obj_t mpbf_set_params (mp_obj_t oprecdigits, mp_obj_t ornd_mode) {
 	__mpbf_precdigits__ = mp_obj_get_int(oprecdigits);
 	__mpbf_rnd_mode__ = mp_obj_get_int(ornd_mode);
+	#ifndef BARE_M
+	__mpbf_returnval__ = realloc(NULL, __mpbf_precdigits__+5); //reserve for digits+1 + '-', '.', 'e' and '\0'
+	#endif
     return mp_const_none;
 }
 
@@ -34,13 +41,17 @@ STATIC mp_obj_t mpbf_sop (mp_obj_t oa, mp_obj_t ob, mp_obj_t oop) {
 	const char *a = mp_obj_str_get_str(oa);
 	const char *b = mp_obj_str_get_str(ob);
 	int op = mp_obj_get_int(oop);
-	__mpbf_returnval__ = realloc(NULL, __mpbf_precdigits__+5); //reserve for digits+1 + '-', '.', 'e' and '\0'
-    __mpbf_returnval__ = bf_sop (a, b, (bf_op_type_t) op, __mpbf_precdigits__, __mpbf_rnd_mode__);
+	strcpy(__mpbf_returnval__, bf_sop (a, b, (bf_op_type_t) op, __mpbf_precdigits__, __mpbf_rnd_mode__));
+	#ifdef BARE_M
+	bf_initialize ();
+	#endif
 	return mp_obj_new_str(__mpbf_returnval__, strlen(__mpbf_returnval__));
 }
 
 STATIC mp_obj_t mpbf_finish (void) {
+	#ifndef BARE_M
 	free (__mpbf_returnval__);
+	#endif
     bf_exit();	
     return mp_const_none;
 }

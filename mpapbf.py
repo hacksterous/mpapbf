@@ -168,10 +168,16 @@ class mpap ():
     #enddef init
 
     def bfwrapper1 (self, op):
-        return mpap(mpbf.sop (self.scistr(), '', op).split('s')[0])
+        #print ("bfwrapper1: calling SOP with op=", op)
+        s = mpbf.sop(self.scistr(), '', op)
+        s = s.split('s')[0]
+        return mpap(s)
 
     def bfwrapper2 (self, other, op):
-        return mpap(mpbf.sop (self.scistr(), other.scistr(), op).split('s')[0])
+        #print ("bfwrapper2: calling SOP with op=", op)
+        s = mpbf.sop(self.scistr(), other.scistr(), op)
+        s = s.split('s')[0]
+        return mpap(s)
 
     def __truediv__ (self, other):
         global MPAPERRORFLAG
@@ -187,9 +193,9 @@ class mpap ():
         re = self.Exponent - (len(str(self.Mantissa).replace('-', '')) - 1)
         re -= other.Exponent - (len(str(other.Mantissa).replace('-', '')) - 1)
 
-		#do division of the mantissa integers with the set precision
+        #do division of the mantissa integers with the set precision
         rm = mpap(self.Mantissa).bfwrapper2(mpap(other.Mantissa), 3)
-		#then adjust the exponent calculated earlier
+        #then adjust the exponent calculated earlier
         rm = mpap(Mantissa = str(rm), Exponent = re, InternalAware = True)
         return rm
 
