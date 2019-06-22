@@ -18,9 +18,15 @@
 
 #ifdef BARE_M
 #include "mpconfig.h"
+	#ifdef USE_GC
+#include "gc.h"
+#define realloc m_realloc
+#define free m_free
+	#else
 #include "misc.h"
 #define realloc m_realloc
 #define free m_free
+	#endif
 #endif
 
 static bf_t A, B, R, S;
@@ -93,6 +99,8 @@ char* bf_sop (
     bf_init(&bf_ctx, &B);
     bf_init(&bf_ctx, &R);
 	bf_init(&bf_ctx, &S);
+	bf_set_zero (&R, 0);
+	bf_set_zero (&S, 0);
 
 	bf_atof (&A, a, NULL, 10, prec, rnd_mode);
 	bf_atof (&B, b, NULL, 10, prec, rnd_mode);

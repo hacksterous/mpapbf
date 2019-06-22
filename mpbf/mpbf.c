@@ -10,10 +10,16 @@
 
 #ifdef BARE_M
 #include "mpconfig.h"
+	#ifdef USE_GC
+#include "gc.h"
+#define realloc m_realloc
+#define free m_free
+	#else
 #include "misc.h"
 #define realloc m_realloc
 #define free m_free
-#endif
+	#endif
+	#endif
 
 #ifdef BARE_M
 STATIC char __mpbf_returnval__[201] = "";
@@ -41,10 +47,10 @@ STATIC mp_obj_t mpbf_sop (mp_obj_t oa, mp_obj_t ob, mp_obj_t oop) {
 	const char *a = mp_obj_str_get_str(oa);
 	const char *b = mp_obj_str_get_str(ob);
 	int op = mp_obj_get_int(oop);
-	strcpy(__mpbf_returnval__, bf_sop (a, b, (bf_op_type_t) op, __mpbf_precdigits__, __mpbf_rnd_mode__));
 	#ifdef BARE_M
 	bf_initialize ();
 	#endif
+	strcpy(__mpbf_returnval__, bf_sop (a, b, (bf_op_type_t) op, __mpbf_precdigits__, __mpbf_rnd_mode__));
 	return mp_obj_new_str(__mpbf_returnval__, strlen(__mpbf_returnval__));
 }
 

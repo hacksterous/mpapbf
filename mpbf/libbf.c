@@ -73,7 +73,7 @@
 
 NORETURN void abort_(void);
 
-__attribute__((noreturn)) void abort (void) {
+NORETURN void abort (void) {
 	abort_();
 }
 #endif
