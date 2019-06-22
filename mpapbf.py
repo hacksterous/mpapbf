@@ -339,7 +339,32 @@ class mpap ():
     def __lt__(self, other):
         if(not isinstance(other, mpap)):
             return self < mpap(other)
-        return True if self.bfwrapper2(other, 20) == 1 else False
+        
+        if((self.Sign == -1 or self.Sign == 0) and other.Sign == 1):
+            #Man = 0 and Exp = 0 means Sign is 0
+            return True
+        if(self.Sign == -1 and other.Sign == -1):
+            return -other < -self
+
+        # Now they are all positive & same
+        if self.Exponent < other.Exponent and other.Sign != 0:
+            return True
+        if self.Exponent > other.Exponent and self.Sign != 0:
+            return False
+
+        # Now they're the same exponent
+        # You cannot directly compare mantissas, because they contain precision digits
+        # e.g. 1.42857 -> (142857, 0), 1.482562 (1428562, 0)
+        # You have to align them and compare, so... the key is to align
+        mSelf = self.Mantissa
+        mOther = other.Mantissa
+        if(len(str(self.Mantissa)) < len(str(other.Mantissa))):
+            mSelf = mSelf * 10**(len(str(other.Mantissa)) - len(str(self.Mantissa)))
+        elif(len(str(self.Mantissa)) > len(str(other.Mantissa))):
+            mOther = mOther * 10**(len(str(self.Mantissa)) - len(str(other.Mantissa)))
+
+        return mSelf < mOther
+		
 
     def __le__(self, other):
         return self == other or self < other
