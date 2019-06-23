@@ -170,14 +170,14 @@ class mpap ():
 
     def bfwrapper1 (self, op):
         #print ("bfwrapper1: calling SOP with op=", op)
-		gc.collect()
+        gc.collect()
         s = mpbf.sop(self.scistr(), '', op)
         s = s.split('s')[0]
         return mpap(s)
 
     def bfwrapper2 (self, other, op):
         #print ("bfwrapper2: calling SOP with op=", op)
-		gc.collect()
+        gc.collect()
         s = mpbf.sop(self.scistr(), other.scistr(), op)
         s = s.split('s')[0]
         return mpap(s)
@@ -367,7 +367,6 @@ class mpap ():
             mOther = mOther * 10**(len(str(self.Mantissa)) - len(str(other.Mantissa)))
 
         return mSelf < mOther
-		
 
     def __le__(self, other):
         return self == other or self < other
