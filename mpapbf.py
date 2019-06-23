@@ -11,6 +11,7 @@ MAX_PRECISION_HARD_LIMIT = 190
 ROUNDING_MODE = 0
 PRECISION = 27 
 import mpbf
+import gc
 
 mpbf.init ()
 mpbf.set_params (PRECISION, ROUNDING_MODE)
@@ -169,12 +170,14 @@ class mpap ():
 
     def bfwrapper1 (self, op):
         #print ("bfwrapper1: calling SOP with op=", op)
+		gc.collect()
         s = mpbf.sop(self.scistr(), '', op)
         s = s.split('s')[0]
         return mpap(s)
 
     def bfwrapper2 (self, other, op):
         #print ("bfwrapper2: calling SOP with op=", op)
+		gc.collect()
         s = mpbf.sop(self.scistr(), other.scistr(), op)
         s = s.split('s')[0]
         return mpap(s)
