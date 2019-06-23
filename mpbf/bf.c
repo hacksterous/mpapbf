@@ -96,9 +96,13 @@ char* bf_sop (
 	prec = (limb_t) (precisiondigits * 4 + 32);
 
     bf_init(&bf_ctx, &A);
+	bf_resize(&A, prec);
     bf_init(&bf_ctx, &B);
+	bf_resize(&B, prec);
     bf_init(&bf_ctx, &R);
+	bf_resize(&R, prec);
 	bf_init(&bf_ctx, &S);
+	bf_resize(&S, prec);
 	bf_set_zero (&R, 0);
 	bf_set_zero (&S, 0);
 

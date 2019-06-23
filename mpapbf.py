@@ -7,7 +7,7 @@
 # (c) 2019 Anirban Banerjee <anirbax@gmail.com>
 #########################################################
 MPAPERRORFLAG = ''
-MAX_PRECISION_HARD_LIMIT = 1000
+MAX_PRECISION_HARD_LIMIT = 190
 ROUNDING_MODE = 0
 PRECISION = 27 
 import mpbf
