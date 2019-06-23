@@ -42,8 +42,10 @@ All operations are done on decimal numbers represented as strings, e.g.:
    MicroPython v1.11-44-g8b18cfede-dirty on 2019-06-14; linux version
    Use Ctrl-D to exit, Ctrl-E for paste mode
    >>> from mpbf import *
+   >>> import gc
    >>> mpbf.init()
    >>> mpbf.set_params(500, 0)  # precision digits, rounding mode
+   >>> gc.collect() #required for microcontrollers if mpbf.sop is called in a loop, else realloc calls can return NULL
    >>> mpbf.sop('1', '0', 5)    # 5 is exponentiation operation -- see bf.h
    '2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274274663919320
    0305992181741359662904357290033429526059563073813232862794349076323382988075319525101901157383418793070215408914993
@@ -51,6 +53,7 @@ All operations are done on decimal numbers represented as strings, e.g.:
    5602976067371132007093287091274437470472306969772093101416928368190255151086574637721112523897844250569536967707854
    4996996794686445490598793163688923009879313s-16'
    >>> mpbf.set_params(5, 0)
+   >>> gc.collect() #required for microcontrollers if mpbf.sop is called in a loop, else realloc calls can return NULL
    >>> mpbf.sop('1', '0', 5)
    '2.71828s-16'
    >>> mpbf.finish() #deallocate memory
