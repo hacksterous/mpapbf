@@ -56,7 +56,8 @@ STATIC mp_obj_t mpbf_sop (mp_obj_t oa, mp_obj_t ob, mp_obj_t oop) {
 
 STATIC mp_obj_t mpbf_finish (void) {
 	#ifndef BARE_M
-	free (__mpbf_returnval__);
+	if (__mpbf_returnval__ != NULL)
+		free (__mpbf_returnval__);
 	#endif
     bf_exit();	
     return mp_const_none;
