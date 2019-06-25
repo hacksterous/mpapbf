@@ -10,16 +10,10 @@
 
 #ifdef BARE_M
 #include "mpconfig.h"
-	#ifdef USE_GC
-#include "gc.h"
-#define realloc m_realloc
-#define free m_free
-	#else
 #include "misc.h"
 #define realloc m_realloc
 #define free m_free
-	#endif
-	#endif
+#endif
 
 #ifdef BARE_M
 STATIC char __mpbf_returnval__[201] = "";
@@ -38,7 +32,7 @@ STATIC mp_obj_t mpbf_set_params (mp_obj_t oprecdigits, mp_obj_t ornd_mode) {
 	__mpbf_precdigits__ = mp_obj_get_int(oprecdigits);
 	__mpbf_rnd_mode__ = mp_obj_get_int(ornd_mode);
 	#ifndef BARE_M
-	__mpbf_returnval__ = realloc(NULL, __mpbf_precdigits__+5); //reserve for digits+1 + '-', '.', 'e' and '\0'
+	__mpbf_returnval__ = realloc(NULL, (__mpbf_precdigits__+5)*sizeof(__mpbf_precdigits__)); //reserve for digits+1 + '-', '.', 'e' and '\0'
 	#endif
     return mp_const_none;
 }
