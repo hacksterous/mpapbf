@@ -6,7 +6,6 @@
 # Targeted for MicroPython on microcontrollers
 # (c) 2019 Anirban Banerjee <anirbax@gmail.com>
 #########################################################
-MPAPERRORFLAG = ''
 MAX_PRECISION_HARD_LIMIT = 190
 ROUNDING_MODE = 0
 PRECISION = 27 
@@ -33,8 +32,6 @@ def sprec(prec):
     mpbf.set_params (PRECISION, ROUNDING_MODE)
 
 class mpap ():
-    PIx2 = '6.283185307179586476925286766559005768394338798750211641949889184615632812572417997256069650684234135988'
-
     # Internal Representation of significant digits + sign.
     Mantissa = None
 
@@ -48,7 +45,8 @@ class mpap ():
     # This is implied in later calculations, beware!
     Exponent = 0
 
-    #True is positive, False is negative
+    NaNInf = False
+
     Sign = 1
 
     ImagMantissa = 0 
@@ -70,8 +68,6 @@ class mpap ():
     def __init__(self, Mantissa, Exponent = 0, InternalAware = False, \
         ImagMantissa = 0, ImagExponent = 0):
 
-        global MPAPERRORFLAG
-
         if(isinstance(Mantissa, mpap)):
             self.Mantissa = Mantissa.Mantissa
             self.Exponent = Mantissa.Exponent
@@ -87,13 +83,24 @@ class mpap ():
         except (ValueError, OverflowError):
             self.Mantissa = 0
             self.Exponent = 0
-            MPAPERRORFLAG = "Illegal mantissa or exponent. \nHint: use strings to hold large numbers!"
+            self.NaNInf = True
             return
 
         if (type(Mantissa) == float or type(Mantissa) == str):
             # String rep of mantissa, useful for reuse (strings are immutable), also UnSigned variant
             strMan = str(Mantissa)
             strManUS = strMan.replace('-', '')
+            if strManUS.lower() == 'nan' or strManUS.lower() == 'inf':
+                self.Mantissa = 0
+                self.Exponent = 0
+                self.NaNInf = True
+                return 
+            elif strManUS.lower() == 'none':
+                #no mathematical result
+                self.Mantissa = 0
+                self.Exponent = 0
+                self.NaNInf = None
+                return 
             # Extract all significant digits
             if('e' in strMan): # Oops, too small; have to expand notation
                 # Something like 1e-07... significant digits are before e, then 
@@ -105,7 +112,7 @@ class mpap ():
                 except (ValueError, OverflowError):
                     self.Mantissa = 0
                     self.Exponent = 0
-                    MPAPERRORFLAG = "Illegal mantissa or exponent."
+                    self.NaNInf = True
                     return
             else:
                 self.Mantissa = int(strMan.replace('.', ''))
@@ -164,14 +171,16 @@ class mpap ():
             i += 1
         self.Mantissa = int (MantissaStr)
 
-        self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 and self.Exponent == 0 else -1))
+        self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
         return
     #enddef init
 
     def bfwrapper1 (self, op):
         #print ("bfwrapper1: calling SOP with op=", op)
         gc.collect()
+        #print ("bfwrapper1: self is ", self.scistr())
         s = mpbf.sop(self.scistr(), '', op)
+        #print ("bfwrapper1: returned result ", s)
         s = s.split('s')[0]
         return mpap(s)
 
@@ -183,13 +192,11 @@ class mpap ():
         return mpap(s)
 
     def __truediv__ (self, other):
-        global MPAPERRORFLAG
         if(not isinstance(other, mpap)):
             return self / mpap(other)
 
         if other == 0:
-            MPAPERRORFLAG = "Division by zero."
-            return mpap(0)
+            return mpap('NaN')
 
         #subtract divisor's exponent from dividend's exponent after adjusting
         #for the InternalAware representaiton
@@ -320,7 +327,17 @@ class mpap ():
     def __mod__ (self, other):
         if(not isinstance(other, mpap)):
             return self % mpap(other)
-        return self.bfwrapper2(other, 16)
+        s = self.bfwrapper2(other, 16)
+        #modulo result has same sign as divisor
+        if other.Sign == 1:
+            if s < 0:
+                s += other 
+        elif other.Sign == -1:
+            if s > 0:
+                s -= other 
+        s.Sign = 0 if s == 0 else other.Sign
+
+        return s
 
     def __abs__(self):
         if(self.Sign == 1):
@@ -342,31 +359,7 @@ class mpap ():
     def __lt__(self, other):
         if(not isinstance(other, mpap)):
             return self < mpap(other)
-        
-        if((self.Sign == -1 or self.Sign == 0) and other.Sign == 1):
-            #Man = 0 and Exp = 0 means Sign is 0
-            return True
-        if(self.Sign == -1 and other.Sign == -1):
-            return -other < -self
-
-        # Now they are all positive & same
-        if self.Exponent < other.Exponent and other.Sign != 0:
-            return True
-        if self.Exponent > other.Exponent and self.Sign != 0:
-            return False
-
-        # Now they're the same exponent
-        # You cannot directly compare mantissas, because they contain precision digits
-        # e.g. 1.42857 -> (142857, 0), 1.482562 (1428562, 0)
-        # You have to align them and compare, so... the key is to align
-        mSelf = self.Mantissa
-        mOther = other.Mantissa
-        if(len(str(self.Mantissa)) < len(str(other.Mantissa))):
-            mSelf = mSelf * 10**(len(str(other.Mantissa)) - len(str(self.Mantissa)))
-        elif(len(str(self.Mantissa)) > len(str(other.Mantissa))):
-            mOther = mOther * 10**(len(str(self.Mantissa)) - len(str(other.Mantissa)))
-
-        return mSelf < mOther
+        return True if self.bfwrapper2(other, 20) == 1 else False
 
     def __le__(self, other):
         return self == other or self < other
@@ -422,23 +415,19 @@ class mpap ():
         return mpap(1 if self == 0 else 0)
 
     def __pow__(self, other):
-        global MPAPERRORFLAG
         if(not isinstance(other, mpap)):
             return self ** mpap(other)
         if (self.Sign == -1 and other.Exponent < 0):
-            MPAPERRORFLAG = "Complex result is not implemented."
-            return mpap (0)
+            return mpap ('NaN')
         return self.bfwrapper2(other, 4)
 
     def sgn(self):
         return self.Sign
 
     def log (self):
-        global MPAPERRORFLAG
         ## See https://stackoverflow.com/questions/27179674/examples-of-log-algorithm-using-arbitrary-precision-maths
         if (self <= 0):
-            MPAPERRORFLAG = "I give up!"
-            return mpap (0)
+            return mpap ('NaN')
         if (self == 1):
             return mpap(0)
         #t = utime.ticks_ms()
@@ -479,50 +468,6 @@ class mpap ():
     def atan (self):
         return self.bfwrapper1(10)
 
-    def atan2 (self):
-        return self.bfwrapper1(11)
-
-    def endian(self, boundary=8):
-        boundary = int(boundary)
-        if boundary == 0:
-            boundary = 8;
-        copy = self
-        result = mpap(0)
-        while copy != 0:
-            result <<= boundary
-            result |= (copy & ((1<<boundary)-1))
-            copy >>= boundary
-
-        return result
-
-    def factors (self):
-        n = int(self)
-
-        if n == 0:
-            self.result = 0
-    
-        self.result = set()
-        self.result |= {int(1), n}
-    
-        def all_multiples(result, n, factor):
-            z = n
-            f = int(factor)
-            while z % f == 0:
-                result |= {f, z // f}
-                f += factor
-            return result
-        
-        self.result = all_multiples(self.result, n, 2)
-        self.result = all_multiples(self.result, n, 3)
-        
-        for i in range(1, int(self.sqrt()) + 1, 6):
-            i1 = i + 1
-            i2 = i + 5
-            if not n % i1:
-                self.result |= {int(i1), n // i1}
-            if not n % i2:
-                self.result |= {int(i2), n // i2}
-
-        print (self.result)
-        return mpap(1)
+    def atan2 (self, other):
+        return self.bfwrapper2(other, 11)
 
