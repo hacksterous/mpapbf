@@ -334,7 +334,7 @@ class mpap ():
                 s += other 
         elif other.Sign == -1:
             if s > 0:
-                s -= other 
+                s += other 
         s.Sign = 0 if s == 0 else other.Sign
 
         return s
