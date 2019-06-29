@@ -71,6 +71,7 @@ class mpap ():
         if(isinstance(Mantissa, mpap)):
             self.Mantissa = Mantissa.Mantissa
             self.Exponent = Mantissa.Exponent
+            self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
             return
 
         try:
@@ -171,7 +172,9 @@ class mpap ():
             i += 1
         self.Mantissa = int (MantissaStr)
 
+        #print ("__init__: self.Mantissa is ", self.Mantissa)
         self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
+        #print ("__init__: Sign has been set to is ", self.Sign)
         return
     #enddef init
 
@@ -186,6 +189,9 @@ class mpap ():
 
     def bfwrapper2 (self, other, op):
         #print ("bfwrapper2: calling SOP with op=", op)
+        #print ("bfwrapper2: other is ", other)
+        #print ("bfwrapper2: other.scistr is ", oss)
+
         gc.collect()
         s = mpbf.sop(self.scistr(), other.scistr(), op)
         s = s.split('s')[0]
@@ -264,11 +270,10 @@ class mpap ():
     # returns new mantissa as a string with adecimal point
     # and the exponent as an integer
     def sci(self):
-        #print ("self is ", repr(self))
+        #print ("sci: self is ", repr(self))
+        #print ("sci: self.Sign is ", self.Sign)
         man = str(self.Mantissa)
         expo = self.Exponent
-        #print ("man is ", man)
-        #print ("expo is ", expo)
         strMantissa = str(man).replace('-', '')
         lenStrMantissa = len(strMantissa)
         if self.Exponent <= 0:
@@ -300,6 +305,8 @@ class mpap ():
             man += '0'
         elif man.find('.') == -1:
             man += '.0'
+        #print ("sci: man is ", man)
+        #print ("sci: expo is ", expo)
         return man, expo
 
     # similar to sci(), but returns a single string as ###.#######e###
@@ -314,8 +321,24 @@ class mpap ():
     def ceil(self):
         return self.floor() + 1
 
+    def frac(self):
+        return self - self.floor()
+
     def __neg__(self):
         return mpap(Mantissa = (-1) * self.Mantissa, Exponent = self.Exponent, InternalAware = True)
+
+    def round (self, digits):
+        #rounds UP so many digits AFTER decimal
+        if digits < 0:
+            return self
+        return self + mpap(Mantissa = 5, Exponent = -(digits + 1))
+
+    def roundstr (self, digits):
+        v = str(self.round(digits)).split('.')
+        if len (v) > 1 and digits > 0:
+            return v[0] + '.' + v[1][:digits]
+        else:
+            return v[0]
 
     def __floordiv__ (self, other):
         if(not isinstance(other, mpap)):
@@ -469,5 +492,6 @@ class mpap ():
         return self.bfwrapper1(10)
 
     def atan2 (self, other):
-        return self.bfwrapper2(other, 11)
+        #print ("atan2: self is ", self)
+        return self.bfwrapper2(mpap(other), 11)
 
