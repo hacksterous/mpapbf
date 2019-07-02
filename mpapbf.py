@@ -74,6 +74,7 @@ class mpap ():
             self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
             return
 
+        #if True:
         try:
             #catch inf in Mantissa and illegal format in Exponent
             if type(Mantissa) == float:
@@ -81,6 +82,7 @@ class mpap ():
                     str(float(Exponent)) == 'inf' or str(float(Exponent)) == '-inf':
                     raise OverflowError
             Exponent = int(Exponent)
+            #pass
         except (ValueError, OverflowError):
             self.Mantissa = 0
             self.Exponent = 0
