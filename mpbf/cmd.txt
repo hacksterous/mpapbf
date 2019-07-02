@@ -1,0 +1,19 @@
+Making a New C Mmodule:
+-----------------------
+create directory inside /ports/<port> with the name mpbf
+cd ports/<port>
+Change Makefile:
+	INC += -I$(TOP)/py
+make CROSS_COMPILE=arm-linux- V=1 USER_C_MODULES=. CFLAGS_EXTRA="-DMODULE_MPBF_ENABLED=1 -DBARE_M=1"
+create a file called micropython.mk inside directory bf
+
+    MPBF_MOD_DIR := $(USERMOD_DIR)
+    
+    SRC_USERMOD += $(MPBF_MOD_DIR)/mpbf.c
+    SRC_USERMOD += $(MPBF_MOD_DIR)/bf.c
+    SRC_USERMOD += $(MPBF_MOD_DIR)/libbf.c
+    SRC_USERMOD += $(MPBF_MOD_DIR)/cutils.c
+    
+    CFLAGS_USERMOD += -I.
+    
+
