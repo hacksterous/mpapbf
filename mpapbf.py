@@ -45,12 +45,6 @@ class mpap ():
     # This is implied in later calculations, beware!
     Exponent = 0
 
-    NaNInf = False
-
-    Sign = 1
-
-    ImagMantissa = 0 
-    ImagExponent = 0
     # __init__
     # Initialization Function
     # If a non-integer float type is passed to Mantissa, then this number will be converted
@@ -65,13 +59,11 @@ class mpap ():
 
     # Set InternalAware = True to interpret as internal representation.
 
-    def __init__(self, Mantissa, Exponent = 0, InternalAware = False, \
-        ImagMantissa = 0, ImagExponent = 0):
+    def __init__(self, Mantissa, Exponent = 0, InternalAware = False):
 
         if(isinstance(Mantissa, mpap)):
             self.Mantissa = Mantissa.Mantissa
             self.Exponent = Mantissa.Exponent
-            self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
             return
 
         #if True:
@@ -84,9 +76,8 @@ class mpap ():
             Exponent = int(Exponent)
             #pass
         except (ValueError, OverflowError):
-            self.Mantissa = 0
+            self.Mantissa = None
             self.Exponent = 0
-            self.NaNInf = True
             return
 
         if (type(Mantissa) == float or type(Mantissa) == str):
@@ -94,15 +85,13 @@ class mpap ():
             strMan = str(Mantissa)
             strManUS = strMan.replace('-', '')
             if strManUS.lower() == 'nan' or strManUS.lower() == 'inf':
-                self.Mantissa = 0
+                self.Mantissa = None
                 self.Exponent = 0
-                self.NaNInf = True
                 return 
             elif strManUS.lower() == 'none':
                 #no mathematical result
-                self.Mantissa = 0
-                self.Exponent = 0
-                self.NaNInf = None
+                self.Mantissa = None
+                self.Exponent = None
                 return 
             # Extract all significant digits
             if('e' in strMan): # Oops, too small; have to expand notation
@@ -113,9 +102,8 @@ class mpap ():
                     self.Mantissa = int(strManParts[0].replace('.', ''))
                     Exponent += int(strManParts[1])
                 except (ValueError, OverflowError):
-                    self.Mantissa = 0
+                    self.Mantissa = None
                     self.Exponent = 0
-                    self.NaNInf = True
                     return
             else:
                 self.Mantissa = int(strMan.replace('.', ''))
@@ -175,8 +163,6 @@ class mpap ():
         self.Mantissa = int (MantissaStr)
 
         #print ("__init__: self.Mantissa is ", self.Mantissa)
-        self.Sign = (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
-        #print ("__init__: Sign has been set to is ", self.Sign)
         return
     #enddef init
 
@@ -221,6 +207,12 @@ class mpap ():
         # 123456 --> (123456, 5)
         return len(str(self.Mantissa).replace('-', '')) <= self.Exponent + 1
 
+    def isNaNInf (self):
+        return self.Mantissa == None and self.Exponent == 0
+
+    def isNone (self):
+        return self.Mantissa == None or self.Exponent == None
+
     def int(self, preserveType = True):
         # 123456 (123456, 5)
         s = str(self.Mantissa).replace('-', '')
@@ -236,16 +228,16 @@ class mpap ():
 
         if preserveType == True:
             #convert to an integer, but return the mpap() version
-            return mpap(s) * self.Sign
+            return mpap(s) * self.sgn()
         else:
-            return int(s) * self.Sign
+            return int(s) * self.sgn()
 
     def __int__ (self):
         return self.int(preserveType = False)
 
     def float (self):
         s = str(self.Mantissa)
-        return float(('-' if self.Sign == -1 else '') + s[0:1] + '.' + s[1:] + 'e' + str(self.Exponent))
+        return float(('-' if self.sgn() == -1 else '') + s[0:1] + '.' + s[1:] + 'e' + str(self.Exponent))
 
     def __repr__(self):
         return "mpap(Mantissa = " + str(self.Mantissa) + ", Exponent = " + str(self.Exponent) + ", InternalAware = True)"
@@ -273,7 +265,6 @@ class mpap ():
     # and the exponent as an integer
     def sci(self):
         #print ("sci: self is ", repr(self))
-        #print ("sci: self.Sign is ", self.Sign)
         man = str(self.Mantissa)
         expo = self.Exponent
         strMantissa = str(man).replace('-', '')
@@ -290,7 +281,7 @@ class mpap ():
                     strMantissa +=  '0'*(multfac+1-lenStrMantissa)
             else:
                 multfac = 0
-            man = ('-' if (self.Sign == -1) else '') + strMantissa[:multfac+1] + '.' + strMantissa[multfac+1:]
+            man = ('-' if (self.sgn() == -1) else '') + strMantissa[:multfac+1] + '.' + strMantissa[multfac+1:]
 
         else:
             diff = self.Exponent - lenStrMantissa + 1 
@@ -301,7 +292,7 @@ class mpap ():
             multfac = self.Exponent % 3 + 1
             #print ("2. multfac is ", multfac)
             expo = (expo// 3) * 3
-            man = ('-' if (self.Sign == -1) else '') + strMantissa[:multfac] + '.' + strMantissa[multfac:]
+            man = ('-' if (self.sgn() == -1) else '') + strMantissa[:multfac] + '.' + strMantissa[multfac:]
         # handle the case when mantissa string is like '123.' -- add a zero at end
         if man[-1:] == '.':
             man += '0'
@@ -318,7 +309,7 @@ class mpap ():
 
     def floor(self):
         i = self.int(preserveType = True)
-        return i if self.Sign >= 0 else i-1
+        return i if self.sgn() >= 0 else i-1
 
     def ceil(self):
         return self.floor() + 1
@@ -354,18 +345,17 @@ class mpap ():
             return self % mpap(other)
         s = self.bfwrapper2(other, 16)
         #modulo result has same sign as divisor
-        if other.Sign == 1:
+        if other.sgn() == 1:
             if s < 0:
                 s += other 
-        elif other.Sign == -1:
+        elif other.sgn() == -1:
             if s > 0:
                 s += other 
-        s.Sign = 0 if s == 0 else other.Sign
 
         return s
 
     def __abs__(self):
-        if(self.Sign == 1):
+        if(self.sgn() == 1):
             return self
         else:
             return -self
@@ -401,7 +391,10 @@ class mpap ():
         return self.bfwrapper2(other, 0)
 
     def __sub__(self, other):
-        return self + (-other)
+        if(not isinstance(other, mpap)):
+            return self - mpap(other)
+        #return self + (-other)
+        return self.bfwrapper2(other, 2)
 
     def __mul__(self, other):
         if(not isinstance(other, mpap)):
@@ -442,12 +435,13 @@ class mpap ():
     def __pow__(self, other):
         if(not isinstance(other, mpap)):
             return self ** mpap(other)
-        if (self.Sign == -1 and other.Exponent < 0):
+        if (self.sgn() == -1 and other.Exponent < 0):
             return mpap ('NaN')
         return self.bfwrapper2(other, 4)
 
     def sgn(self):
-        return self.Sign
+        return (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
+
 
     def log (self):
         ## See https://stackoverflow.com/questions/27179674/examples-of-log-algorithm-using-arbitrary-precision-maths
