@@ -38,6 +38,7 @@ void bf_exit (void) {
     bf_context_end(&bf_ctx);
 }
 
+#ifndef NOBFSTATUS
 void reverse (char* s) {
     //K&R
     int c, i, j;
@@ -66,6 +67,7 @@ char* itostr(unsigned int num, char* str) {
   
     return str; 
 }
+#endif
 
 //takes in:
 //    char* number a in the form '11.22222e1234'
@@ -191,7 +193,11 @@ char* bf_sop (
     bf_delete(&R);
     bf_delete(&S);
 
+#ifndef NOBFSTATUS
     char bf_status_string[10];
     return strcat(strcat(digits, "s"), itostr(status, bf_status_string));
+#else
+    return (digits);
+#endif
 }
 
