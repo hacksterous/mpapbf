@@ -242,7 +242,7 @@ class mpap ():
     def __repr__(self):
         return "mpap(Mantissa = " + str(self.Mantissa) + ", Exponent = " + str(self.Exponent) + ", InternalAware = True)"
 
-    def __str__(self):
+    def __str__(self, decimalplaces=6):
         if self.isInt():
             return str(int(self))
         elif len(str(self.Mantissa)) - 1 > self.Exponent and self.Exponent >= 0:
@@ -251,13 +251,19 @@ class mpap ():
             decPoint = self.Exponent + 1
             return ('-' if self.Mantissa < 0 else '') + strAbsSelfMantissa[:decPoint] + '.' + strAbsSelfMantissa[decPoint:]
         else:
+            # fractional number
             strAbsSelfMantissa = str(abs(self.Mantissa))
-            frac = strAbsSelfMantissa[1:]
-            # mpap(1, -3) is 1.0e-3 and not 1.e-3
-            if frac == '':
-                frac = '0'
-            strAbsSelfMantissa = strAbsSelfMantissa[0] + '.' + frac
-            return ('-' if self.Mantissa < 0 else '') + strAbsSelfMantissa + "e" + str(self.Exponent)
+            if abs(self.Exponent) >= decimalplaces:
+                frac = strAbsSelfMantissa[1:]
+                # mpap(1, -3) is 1.0e-3 and not 1.e-3
+                if frac == '':
+                    frac = '0'
+                strAbsSelfMantissa = strAbsSelfMantissa[0] + '.' + frac
+                return ('-' if self.Mantissa < 0 else '') + strAbsSelfMantissa + "e" + str(self.Exponent)
+            else:
+                strAbsSelfMantissa = ('-0.' if self.Mantissa < 0 else '0.') + '0'*(abs(self.Exponent) - 1) + strAbsSelfMantissa
+                #print ("strAbsSelfMantissa is ", strAbsSelfMantissa)
+                return strAbsSelfMantissa
 
     # return number in the form of
     # Mantissa = ###.#######, Exponent = ###*3
@@ -322,11 +328,15 @@ class mpap ():
 
     def round (self, digits):
         #rounds UP so many digits AFTER decimal
+        #print ("round: self is ", self)
         if digits < 0:
             return self
-        return self + mpap(Mantissa = 5, Exponent = -(digits + 1))
+        r = self + mpap(Mantissa = 5, Exponent = -(digits + 1))
+        #print ("round: r is ", r)
+        return r
 
     def roundstr (self, digits):
+        #print ("roundstr: self is ", self)
         v = str(self.round(digits)).split('.')
         if len (v) > 1 and digits > 0:
             return v[0] + '.' + v[1][:digits]
@@ -442,6 +452,11 @@ class mpap ():
     def sgn(self):
         return (1 if self.Mantissa > 0 else (0 if self.Mantissa == 0 else -1))
 
+    def ln (self):
+        return log(self)
+
+    def log10 (self):
+        return self.log()/(mpap(10).log())
 
     def log (self):
         ## See https://stackoverflow.com/questions/27179674/examples-of-log-algorithm-using-arbitrary-precision-maths
@@ -450,9 +465,9 @@ class mpap ():
         if (self == 1):
             return mpap(0)
         #t = utime.ticks_ms()
-        r = self.bfwrapper1(6)
+        #r = self.bfwrapper1(6)
         #print ("Time taken for log:", utime.ticks_diff(utime.ticks_ms(), t))
-        return r
+        return self.bfwrapper1(6)
 
     def pi(self):
         return self.bfwrapper1(22)
@@ -491,3 +506,30 @@ class mpap ():
         #print ("atan2: self is ", self)
         return self.bfwrapper2(mpap(other), 11)
 
+    def asinh (self):
+        return (self + (self*self + 1).sqrt()).log()
+
+    def acosh (self):
+        if (self < 1):
+            return mpap ('NaN')
+        elif self == 1:
+            return mpap(0)
+        else:
+            return (self + (self*self - 1).sqrt()).log()
+        
+    def atanh (self):
+        if (self < 1):
+            return mpap ('NaN')
+        elif self == 1:
+            return mpap(0)
+        else:
+            return ((self + 1) / (self - 1)).log() / 2
+
+    def sinh (self):
+        return (self.exp() - (-self).exp()) / 2
+
+    def cosh (self):
+        return (self.exp() + (-self).exp()) / 2
+
+    def tanh (self):
+        return ((self * 2).exp() - 1)/((self * 2).exp() + 1)
