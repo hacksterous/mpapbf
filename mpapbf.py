@@ -71,6 +71,7 @@ class mpap ():
             #catch inf in Mantissa and illegal format in Exponent
             if type(Mantissa) == float:
                 if str(float(Mantissa)) == 'inf' or str(float(Mantissa)) == '-inf' or \
+                    str(float(Mantissa)) == 'nan' or str(float(Exponent)) == 'nan' or \
                     str(float(Exponent)) == 'inf' or str(float(Exponent)) == '-inf':
                     raise OverflowError
             Exponent = int(Exponent)
@@ -88,7 +89,7 @@ class mpap ():
                 self.Mantissa = None
                 self.Exponent = 0
                 return 
-            elif strManUS.lower() == 'none':
+            elif strManUS.lower() == 'none' or strManUS == '':
                 #no mathematical result
                 self.Mantissa = None
                 self.Exponent = None
