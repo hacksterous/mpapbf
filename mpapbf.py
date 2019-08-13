@@ -6,6 +6,7 @@
 # Targeted for MicroPython on microcontrollers
 # (c) 2019 Anirban Banerjee <anirbax@gmail.com>
 #########################################################
+MPBF_DEGREES_MODE = False
 MAX_PRECISION_HARD_LIMIT = 190
 ROUNDING_MODE = 0
 PRECISION = 27 
@@ -486,26 +487,54 @@ class mpap ():
         return mpap(self.log()/mpap(2).log()).ceil()
 
     def tan (self):
-        return self.bfwrapper1(9)
+        if MPBF_DEGREES_MODE == True:
+            d2r = mpap('3.1415926535897932384626433832795') / 180
+            return (self * d2r).bfwrapper1(9)
+        else:
+            return self.bfwrapper1(9)
 
     def sin (self):
-        return self.bfwrapper1(7)
+        if MPBF_DEGREES_MODE == True:
+            d2r = mpap('3.1415926535897932384626433832795') / 180
+            return (self * d2r).bfwrapper1(7)
+        else:
+            return self.bfwrapper1(7)
 
     def cos (self):
-        return self.bfwrapper1(8)
+        if MPBF_DEGREES_MODE == True:
+            d2r = mpap('3.1415926535897932384626433832795') / 180
+            return (self * d2r).bfwrapper1(8)
+        else:
+            return self.bfwrapper1(8)
 
     def acos (self):
-        return self.bfwrapper1(12)
+        if MPBF_DEGREES_MODE == True:
+            r2d = mpap(180) / mpap('3.1415926535897932384626433832795')
+            return self.bfwrapper1(12) * r2d
+        else:
+            return self.bfwrapper1(12)
 
     def asin (self):
-        return self.bfwrapper1(13)
+        if MPBF_DEGREES_MODE == True:
+            r2d = mpap(180) / mpap('3.1415926535897932384626433832795')
+            return self.bfwrapper1(13) * r2d
+        else:
+            return self.bfwrapper1(13)
 
     def atan (self):
-        return self.bfwrapper1(10)
+        if MPBF_DEGREES_MODE == True:
+            r2d = mpap(180) / mpap('3.1415926535897932384626433832795')
+            return self.bfwrapper1(10) * r2d
+        else:
+            return self.bfwrapper1(10)
 
     def atan2 (self, other):
         #print ("atan2: self is ", self)
-        return self.bfwrapper2(mpap(other), 11)
+        if MPBF_DEGREES_MODE == True:
+            r2d = mpap(180) / mpap('3.1415926535897932384626433832795')
+            return self.bfwrapper1(11) * r2d
+        else:
+            return self.bfwrapper2(mpap(other), 11)
 
     def asinh (self):
         return (self + (self*self + 1).sqrt()).log()
